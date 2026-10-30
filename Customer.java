@@ -1,0 +1,44 @@
+public class Customer {
+
+    private final String customerId;
+    private String name;
+    private String email;
+    private String mobile;
+
+    private static long customerCounter = 100;
+
+    private static String generateCustomerId() {
+        customerCounter++;
+        return "CUST" + customerCounter;
+    }
+
+    public Customer(String name, String email, String mobile) {
+        this.customerId = generateCustomerId();
+        this.name = name;
+        this.email = email;
+        this.mobile = mobile;
+    }
+
+    public String getCustomerId() {
+        return customerId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getMobile() {
+        return mobile;
+    }
+
+    public void displayCustomer() {
+        System.out.println("Customer ID : " + customerId);
+        System.out.println("Name        : " + name);
+        System.out.println("Email       : " + email);
+        System.out.println("Mobile      : " + mobile);
+    }
+}

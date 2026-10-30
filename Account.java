@@ -1,4 +1,6 @@
-public class Account {
+import java.util.Objects;
+
+public class Account implements Cloneable {
 
     private final String accountNumber;
     private String ownerName;
@@ -27,7 +29,7 @@ public class Account {
         this.active = true;
     }
 
-    // Overloaded constructor
+    // Constructor overloading
     public Account(String ownerName) {
         this(ownerName, 0);
     }
@@ -75,7 +77,9 @@ public class Account {
         }
 
         if (amount <= 0) {
-            System.out.println("Withdrawal amount must be positive.");
+            System.out.println(
+                "Withdrawal amount must be positive."
+            );
             return false;
         }
 
@@ -94,11 +98,56 @@ public class Account {
     }
 
     public void displayAccount() {
-
         System.out.println("------------------------------");
         System.out.println("Account No : " + accountNumber);
         System.out.println("Owner      : " + ownerName);
         System.out.println("Balance    : Rs. " + balance);
         System.out.println("Active     : " + active);
+    }
+
+    // PRACTICAL 3: toString()
+    @Override
+    public String toString() {
+        return "Account{" +
+                "accountNumber='" + accountNumber + '\'' +
+                ", ownerName='" + ownerName + '\'' +
+                ", balance=" + balance +
+                ", active=" + active +
+                '}';
+    }
+
+    // PRACTICAL 3: equals()
+    @Override
+    public boolean equals(Object obj) {
+
+        if (this == obj) {
+            return true;
+        }
+
+        if (!(obj instanceof Account other)) {
+            return false;
+        }
+
+        return Objects.equals(
+            this.accountNumber,
+            other.accountNumber
+        );
+    }
+
+    // PRACTICAL 3: hashCode()
+    @Override
+    public int hashCode() {
+        return Objects.hash(accountNumber);
+    }
+
+    // PRACTICAL 3: clone()
+    @Override
+    public Account clone() {
+
+        try {
+            return (Account) super.clone();
+        } catch (CloneNotSupportedException e) {
+            throw new AssertionError(e);
+        }
     }
 }

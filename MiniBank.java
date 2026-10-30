@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
-// Record introduced in Practical 1
+// Practical 1: Record
 record BankInfo(String name, String branch) {}
 
-// Enum introduced in Practical 1
+// Practical 1: Enum
 enum MenuOption {
     OPEN_ACCOUNT,
     DEPOSIT,
@@ -26,11 +26,22 @@ public class MiniBank {
             + " | " + bank.branch() + " ==="
         );
 
-        // PRACTICAL 2: Create customers
+        // ---------------------------------
+        // PRACTICAL 2: CUSTOMER AND ACCOUNT
+        // ---------------------------------
+
+        Customer.Address address1 =
+            new Customer.Address(
+                "Silvassa",
+                "Dadra and Nagar Haveli",
+                "396230"
+            );
+
         Customer customer1 = new Customer(
             "Priyanshi",
             "priyanshi@example.com",
-            "9876543210"
+            "9876543210",
+            address1
         );
 
         Customer customer2 = new Customer(
@@ -47,7 +58,7 @@ public class MiniBank {
 
         customer2.displayCustomer();
 
-        // PRACTICAL 2: Array of Account objects
+        // Array of Account objects
         Account[] accounts = new Account[3];
 
         accounts[0] = new Account("Priyanshi", 5000);
@@ -60,11 +71,19 @@ public class MiniBank {
             account.displayAccount();
         }
 
-        // Deposit and withdrawal demonstration
-        System.out.println("\n=== TRANSACTION DEMONSTRATION ===");
+        // ---------------------------------
+        // PRACTICAL 2: TRANSACTIONS
+        // ---------------------------------
 
         System.out.println(
-            "Initial Balance: Rs. " + accounts[0].getBalance()
+            "\n=== TRANSACTION DEMONSTRATION ==="
+        );
+        System.out.println("Account Holder : " + accounts[0].getOwnerName());
+        System.out.println("Account Number : " + accounts[0].getAccountNumber());
+
+        System.out.println(
+            "Initial Balance: Rs. "
+            + accounts[0].getBalance()
         );
 
         accounts[0].deposit(2000);
@@ -92,7 +111,104 @@ public class MiniBank {
             + accounts[0].getBalance()
         );
 
-        // Menu from Practical 1
+        // ---------------------------------
+        // PRACTICAL 3: OBJECT METHODS
+        // ---------------------------------
+
+        System.out.println(
+            "\n=== PRACTICAL 3: OBJECT METHODS ==="
+        );
+
+        // 1. toString()
+        System.out.println("\n1. toString()");
+
+        System.out.println(accounts[0]);
+
+        // 2. equals()
+        System.out.println("\n2. equals()");
+
+        System.out.println(
+            "Account 1 equals Account 2: "
+            + accounts[0].equals(accounts[1])
+        );
+
+        System.out.println(
+            "Account 1 equals itself: "
+            + accounts[0].equals(accounts[0])
+        );
+
+        // 3. hashCode()
+        System.out.println("\n3. hashCode()");
+
+        System.out.println(
+            "Account 1 hashCode: "
+            + accounts[0].hashCode()
+        );
+
+        // 4. clone()
+        System.out.println("\n4. clone()");
+
+        Account clonedAccount = accounts[0].clone();
+
+        System.out.println(
+            "Original Account: " + accounts[0]
+        );
+
+        System.out.println(
+            "Cloned Account  : " + clonedAccount
+        );
+
+        System.out.println(
+            "Original equals Clone: "
+            + accounts[0].equals(clonedAccount)
+        );
+
+        System.out.println(
+            "Same object in memory: "
+            + (accounts[0] == clonedAccount)
+        );
+
+        System.out.println(
+            "Same hashCode: "
+            + (accounts[0].hashCode()
+                == clonedAccount.hashCode())
+        );
+
+        // 5. instanceof
+        System.out.println("\n5. instanceof");
+
+        System.out.println(
+            "Is clonedAccount an Account? "
+            + (clonedAccount instanceof Account)
+        );
+
+        Object obj = customer1;
+
+        System.out.println(
+            "Is obj a Customer? "
+            + (obj instanceof Customer)
+        );
+
+        System.out.println(
+            "Is obj an Account? "
+            + (obj instanceof Account)
+        );
+
+        // 6. Nested Address class
+        System.out.println("\n6. Nested Address Class");
+
+        System.out.println(
+            "Customer Name: " + customer1.getName()
+        );
+
+        System.out.println(
+            "Customer Address: " + customer1.getAddress()
+        );
+
+        // ---------------------------------
+        // PRACTICAL 1: MENU SYSTEM
+        // ---------------------------------
+
         try (Scanner scanner = new Scanner(System.in)) {
 
             boolean running = true;
@@ -100,6 +216,7 @@ public class MiniBank {
             while (running) {
 
                 System.out.println("\n=== MINIBANK MENU ===");
+
                 System.out.println("1. Open Account");
                 System.out.println("2. Deposit");
                 System.out.println("3. Withdraw");
@@ -119,11 +236,13 @@ public class MiniBank {
                 int choice = scanner.nextInt();
 
                 MenuOption option = switch (choice) {
+
                     case 1 -> MenuOption.OPEN_ACCOUNT;
                     case 2 -> MenuOption.DEPOSIT;
                     case 3 -> MenuOption.WITHDRAW;
                     case 4 -> MenuOption.TRANSFER;
                     case 5 -> MenuOption.EXIT;
+
                     default -> null;
                 };
 

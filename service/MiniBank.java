@@ -1,19 +1,13 @@
 package service;
 
 import java.util.Scanner;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 import model.Account;
 import model.SavingsAccount;
 import model.CurrentAccount;
 import model.FixedDepositAccount;
 
-import persistence.StatePersister;
-import persistence.TransactionLog;
-import persistence.ReportGenerator;
-
-// Bank information record
+// Bank information
 record BankInfo(String name, String branch) {}
 
 // Menu options
@@ -43,195 +37,181 @@ public class MiniBank {
             + " | " + bank.branch() + " ==="
         );
 
-        // PRACTICAL 11 DEMONSTRATION
-        practical11Demo();
+        // PRACTICAL 12 DEMONSTRATION
+        practical12Demo();
 
         // EXISTING MINIBANK MENU
         showMenu();
     }
 
     // ==========================================
-    // PRACTICAL 11: FILE HANDLING
+    // PRACTICAL 12: COLLECTIONS FRAMEWORK
     // ==========================================
 
-    private static void practical11Demo() {
+    private static void practical12Demo() {
 
         System.out.println(
-            "\n=== PRACTICAL 11: FILE HANDLING AND SERIALIZATION ==="
+            "\n=== PRACTICAL 12: COLLECTIONS FRAMEWORK ==="
         );
 
-        try {
+        // STEP 1: CREATE ACCOUNT STORE
 
-            // STEP 1: CREATE ACCOUNTS
+        AccountStore store = new AccountStore();
 
-            Account[] accounts = {
+        // STEP 2: CREATE ACCOUNTS
 
-                new SavingsAccount(
-                    "Priyanshi",
-                    5000,
-                    1000
-                ),
+        Account savings = new SavingsAccount(
+            "Priyanshi",
+            5000,
+            1000
+        );
 
-                new CurrentAccount(
-                    "Rahul",
-                    3000,
-                    2000
-                ),
+        Account current = new CurrentAccount(
+            "Rahul",
+            2000,
+            1000
+        );
 
-                new FixedDepositAccount(
-                    "Anjali",
-                    10000
-                )
-            };
+        Account fixedDeposit = new FixedDepositAccount(
+            "Anjali",
+            9000
+        );
 
-            // STEP 2: DEFINE FILE PATHS
+        // STEP 3: ADD ACCOUNTS TO HASHMAP
 
-            Path dataFile = Path.of(
-                "data",
-                "accounts.dat"
-            );
+        store.add(savings);
+        store.add(current);
+        store.add(fixedDeposit);
 
-            Path logFile = Path.of(
-                "logs",
-                "transactions.log"
-            );
+        System.out.println(
+            "\n=== ACCOUNTS ADDED TO HASHMAP ==="
+        );
 
-            Path reportFile = Path.of(
-                "reports",
-                "report.txt"
-            );
+        System.out.println(
+            "Total Accounts: " + store.getAccountCount()
+        );
 
-            // STEP 3: SAVE ACCOUNTS
+        // STEP 4: DISPLAY ALL ACCOUNTS
 
-            System.out.println(
-                "\n=== SAVING ACCOUNT DATA ==="
-            );
+        System.out.println(
+            "\n=== ALL ACCOUNTS ==="
+        );
 
-            StatePersister.save(
-                accounts,
-                dataFile
-            );
+        for (Account account : store.getAll()) {
 
             System.out.println(
-                "Accounts saved successfully."
+                account.getAccountNumber()
+                + " | "
+                + account.getOwnerName()
+                + " | Rs. "
+                + account.getBalance()
             );
-
-            System.out.println(
-                "File: " + dataFile
-            );
-
-            // STEP 4: LOAD ACCOUNTS
-
-            System.out.println(
-                "\n=== LOADING ACCOUNT DATA ==="
-            );
-
-            Account[] loadedAccounts =
-                    StatePersister.load(dataFile);
-
-            System.out.println(
-                "Accounts loaded successfully."
-            );
-
-            // STEP 5: DISPLAY LOADED ACCOUNTS
-
-            System.out.println(
-                "\n=== LOADED ACCOUNT DETAILS ==="
-            );
-
-            for (Account account : loadedAccounts) {
-
-                System.out.println(
-                    "------------------------------"
-                );
-
-                System.out.println(
-                    "Account Number : "
-                    + account.getAccountNumber()
-                );
-
-                System.out.println(
-                    "Account Holder : "
-                    + account.getOwnerName()
-                );
-
-                System.out.println(
-                    "Account Type   : "
-                    + account.getClass().getSimpleName()
-                );
-
-                System.out.println(
-                    "Balance        : Rs. "
-                    + account.getBalance()
-                );
-            }
-
-            // STEP 6: CREATE TRANSACTION LOG
-
-            System.out.println(
-                "\n=== TRANSACTION LOGGING ==="
-            );
-
-            // Reset the demonstration log on each run.
-            Files.deleteIfExists(logFile);
-
-            TransactionLog.append(
-                logFile,
-                "DEPOSIT AC0001 500"
-            );
-
-            TransactionLog.append(
-                logFile,
-                "WITHDRAW AC0002 200"
-            );
-
-            TransactionLog.append(
-                logFile,
-                "DEPOSIT AC0003 1000"
-            );
-
-            System.out.println(
-                "Transactions logged successfully."
-            );
-
-            System.out.println(
-                "Log File: " + logFile
-            );
-
-            // STEP 7: GENERATE REPORT
-
-            System.out.println(
-                "\n=== GENERATING BANK REPORT ==="
-            );
-
-            ReportGenerator.generate(
-                Path.of("logs"),
-                reportFile
-            );
-
-            System.out.println(
-                "Report generated successfully."
-            );
-
-            System.out.println(
-                "Report File: " + reportFile
-            );
-
-            // STEP 8: SUCCESS MESSAGE
-
-            System.out.println(
-                "\n=== PRACTICAL 11 COMPLETED SUCCESSFULLY ==="
-            );
-
-        } catch (Exception e) {
-
-            System.out.println(
-                "File Handling Error: "
-                + e.getMessage()
-            );
-
-            e.printStackTrace();
         }
+
+        // STEP 5: SEARCH ACCOUNT
+
+        System.out.println(
+            "\n=== SEARCH ACCOUNT BY NUMBER ==="
+        );
+
+        String searchNumber = current.getAccountNumber();
+
+        Account found = store.get(searchNumber);
+
+        if (found != null) {
+
+            System.out.println(
+                "Account Found Successfully!"
+            );
+
+            System.out.println(
+                "Account Number : "
+                + found.getAccountNumber()
+            );
+
+            System.out.println(
+                "Account Holder : "
+                + found.getOwnerName()
+            );
+
+            System.out.println(
+                "Balance        : Rs. "
+                + found.getBalance()
+            );
+
+        } else {
+
+            System.out.println(
+                "Account not found."
+            );
+        }
+
+        // STEP 6: SORT ACCOUNTS BY BALANCE
+
+        System.out.println(
+            "\n=== ACCOUNTS SORTED BY BALANCE ==="
+        );
+
+        for (Account account : store.sortedByBalance()) {
+
+            System.out.println(
+                account.getAccountNumber()
+                + " | "
+                + account.getOwnerName()
+                + " | Rs. "
+                + account.getBalance()
+            );
+        }
+
+        // STEP 7: STORE TRANSACTION HISTORY
+
+        store.addTransaction(
+            "DEPOSIT " + savings.getAccountNumber() + " 500"
+        );
+
+        store.addTransaction(
+            "WITHDRAW " + current.getAccountNumber() + " 200"
+        );
+
+        store.addTransaction(
+            "DEPOSIT " + fixedDeposit.getAccountNumber() + " 1000"
+        );
+
+        System.out.println(
+            "\n=== TRANSACTION HISTORY ==="
+        );
+
+        for (String transaction :
+                store.getTransactionHistory()) {
+
+            System.out.println(transaction);
+        }
+
+        // STEP 8: CONCURRENT HASHMAP
+
+        System.out.println(
+            "\n=== CONCURRENT HASHMAP TEST ==="
+        );
+
+        TransactionProcessor processor =
+                new TransactionProcessor();
+
+        processor.addAccount(savings);
+        processor.addAccount(current);
+        processor.addAccount(fixedDeposit);
+
+        System.out.println(
+            "Thread-safe accounts stored: "
+            + processor.getAllAccounts().size()
+        );
+
+        processor.stop();
+
+        // STEP 9: COMPLETION MESSAGE
+
+        System.out.println(
+            "\n=== PRACTICAL 12 COMPLETED SUCCESSFULLY ==="
+        );
     }
 
     // ==========================================
@@ -250,29 +230,13 @@ public class MiniBank {
                     "\n=== MINIBANK MENU ==="
                 );
 
-                System.out.println(
-                    "1. Open Account"
-                );
+                System.out.println("1. Open Account");
+                System.out.println("2. Deposit");
+                System.out.println("3. Withdraw");
+                System.out.println("4. Transfer");
+                System.out.println("5. Exit");
 
-                System.out.println(
-                    "2. Deposit"
-                );
-
-                System.out.println(
-                    "3. Withdraw"
-                );
-
-                System.out.println(
-                    "4. Transfer"
-                );
-
-                System.out.println(
-                    "5. Exit"
-                );
-
-                System.out.print(
-                    "Enter your choice: "
-                );
+                System.out.print("Enter your choice: ");
 
                 if (!scanner.hasNextInt()) {
 
@@ -281,7 +245,6 @@ public class MiniBank {
                     );
 
                     scanner.next();
-
                     continue;
                 }
 
@@ -290,24 +253,16 @@ public class MiniBank {
                 MenuOption option = switch (choice) {
 
                     case 1 -> MenuOption.OPEN_ACCOUNT;
-
                     case 2 -> MenuOption.DEPOSIT;
-
                     case 3 -> MenuOption.WITHDRAW;
-
                     case 4 -> MenuOption.TRANSFER;
-
                     case 5 -> MenuOption.EXIT;
-
                     default -> null;
                 };
 
                 if (option == null) {
 
-                    System.out.println(
-                        "Invalid choice."
-                    );
-
+                    System.out.println("Invalid choice.");
                     continue;
                 }
 

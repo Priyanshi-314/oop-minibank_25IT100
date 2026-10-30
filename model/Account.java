@@ -13,7 +13,9 @@ import model.annotation.MaxLength;
 
 public abstract class Account
         implements Cloneable, Transactable,
-                   InterestBearing, java.io.Serializable {
+                   InterestBearing,
+                   java.io.Serializable,
+                   Comparable<Account>{
 
     // ==============================
     // PRACTICAL 7: ANNOTATIONS
@@ -409,5 +411,13 @@ private static final long serialVersionUID = 1L;
 
             throw new AssertionError(e);
         }
+    }
+    
+    @Override
+    public int compareTo(Account other) {
+
+        return this.getAccountNumber().compareTo(
+            other.getAccountNumber()
+        );
     }
 }

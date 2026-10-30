@@ -1,9 +1,9 @@
 import java.util.Scanner;
 
-// Practical 1: Record
+// PRACTICAL 1: Record
 record BankInfo(String name, String branch) {}
 
-// Practical 1: Enum
+// PRACTICAL 1: Enum
 enum MenuOption {
     OPEN_ACCOUNT,
     DEPOSIT,
@@ -16,6 +16,10 @@ public class MiniBank {
 
     public static void main(String[] args) {
 
+        // ====================================
+        // PRACTICAL 1: BANK INFORMATION
+        // ====================================
+
         BankInfo bank = new BankInfo(
             "MiniBank",
             "Main Branch"
@@ -26,22 +30,22 @@ public class MiniBank {
             + " | " + bank.branch() + " ==="
         );
 
-        // ---------------------------------
-        // PRACTICAL 2: CUSTOMER AND ACCOUNT
-        // ---------------------------------
+        // ====================================
+        // PRACTICAL 2: CUSTOMER DETAILS
+        // ====================================
 
-        Customer.Address address1 =
-            new Customer.Address(
-                "Silvassa",
-                "Dadra and Nagar Haveli",
-                "396230"
-            );
+        Customer.Address address =
+                new Customer.Address(
+                    "Silvassa",
+                    "Dadra and Nagar Haveli",
+                    "396230"
+                );
 
         Customer customer1 = new Customer(
             "Priyanshi",
             "priyanshi@example.com",
             "9876543210",
-            address1
+            address
         );
 
         Customer customer2 = new Customer(
@@ -58,7 +62,10 @@ public class MiniBank {
 
         customer2.displayCustomer();
 
-        // Array of Account objects
+        // ====================================
+        // PRACTICAL 2: ACCOUNT OBJECTS
+        // ====================================
+
         Account[] accounts = new Account[3];
 
         accounts[0] = new Account("Priyanshi", 5000);
@@ -71,19 +78,24 @@ public class MiniBank {
             account.displayAccount();
         }
 
-        // ---------------------------------
+        // ====================================
         // PRACTICAL 2: TRANSACTIONS
-        // ---------------------------------
+        // ====================================
 
         System.out.println(
             "\n=== TRANSACTION DEMONSTRATION ==="
         );
-        System.out.println("Account Holder : " + accounts[0].getOwnerName());
-        System.out.println("Account Number : " + accounts[0].getAccountNumber());
 
         System.out.println(
-            "Initial Balance: Rs. "
-            + accounts[0].getBalance()
+            "Account Holder : " + accounts[0].getOwnerName()
+        );
+
+        System.out.println(
+            "Account Number : " + accounts[0].getAccountNumber()
+        );
+
+        System.out.println(
+            "Initial Balance: Rs. " + accounts[0].getBalance()
         );
 
         accounts[0].deposit(2000);
@@ -107,24 +119,21 @@ public class MiniBank {
         );
 
         System.out.println(
-            "Final Balance: Rs. "
-            + accounts[0].getBalance()
+            "Final Balance: Rs. " + accounts[0].getBalance()
         );
 
-        // ---------------------------------
+        // ====================================
         // PRACTICAL 3: OBJECT METHODS
-        // ---------------------------------
+        // ====================================
 
         System.out.println(
             "\n=== PRACTICAL 3: OBJECT METHODS ==="
         );
 
-        // 1. toString()
         System.out.println("\n1. toString()");
 
         System.out.println(accounts[0]);
 
-        // 2. equals()
         System.out.println("\n2. equals()");
 
         System.out.println(
@@ -137,7 +146,6 @@ public class MiniBank {
             + accounts[0].equals(accounts[0])
         );
 
-        // 3. hashCode()
         System.out.println("\n3. hashCode()");
 
         System.out.println(
@@ -145,7 +153,6 @@ public class MiniBank {
             + accounts[0].hashCode()
         );
 
-        // 4. clone()
         System.out.println("\n4. clone()");
 
         Account clonedAccount = accounts[0].clone();
@@ -168,13 +175,6 @@ public class MiniBank {
             + (accounts[0] == clonedAccount)
         );
 
-        System.out.println(
-            "Same hashCode: "
-            + (accounts[0].hashCode()
-                == clonedAccount.hashCode())
-        );
-
-        // 5. instanceof
         System.out.println("\n5. instanceof");
 
         System.out.println(
@@ -194,7 +194,6 @@ public class MiniBank {
             + (obj instanceof Account)
         );
 
-        // 6. Nested Address class
         System.out.println("\n6. Nested Address Class");
 
         System.out.println(
@@ -205,9 +204,138 @@ public class MiniBank {
             "Customer Address: " + customer1.getAddress()
         );
 
-        // ---------------------------------
+        // ====================================
+        // PRACTICAL 4: INPUT VALIDATION
+        // ====================================
+
+        System.out.println(
+            "\n=== PRACTICAL 4: INPUT VALIDATION ==="
+        );
+
+        System.out.println("\n1. MOBILE VALIDATION");
+
+        System.out.println(
+            "9876543210 : "
+            + Validator.isValidMobile("9876543210")
+        );
+
+        System.out.println(
+            "12345      : "
+            + Validator.isValidMobile("12345")
+        );
+
+        System.out.println("\n2. EMAIL VALIDATION");
+
+        System.out.println(
+            "abc@xyz.com : "
+            + Validator.isValidEmail("abc@xyz.com")
+        );
+
+        System.out.println(
+            "abcxyz.com  : "
+            + Validator.isValidEmail("abcxyz.com")
+        );
+
+        System.out.println("\n3. PAN VALIDATION");
+
+        System.out.println(
+            "ABCDE1234F : "
+            + Validator.isValidPan("ABCDE1234F")
+        );
+
+        System.out.println(
+            "ABC123     : "
+            + Validator.isValidPan("ABC123")
+        );
+
+        System.out.println("\n4. IFSC VALIDATION");
+
+        System.out.println(
+            "SBIN0001234 : "
+            + Validator.isValidIfsc("SBIN0001234")
+        );
+
+        System.out.println(
+            "12345       : "
+            + Validator.isValidIfsc("12345")
+        );
+
+        System.out.println("\n5. AMOUNT VALIDATION");
+
+        System.out.println(
+            "500 : " + Validator.isValidAmount("500")
+        );
+
+        System.out.println(
+            "-50 : " + Validator.isValidAmount("-50")
+        );
+
+        // ====================================
+        // PRACTICAL 4: COMMAND PARSING
+        // ====================================
+
+        System.out.println(
+            "\n=== PRACTICAL 4: COMMAND PARSING ==="
+        );
+
+        String commandText = "DEPOSIT AC0001 500";
+
+        System.out.println(
+            "Input Command : " + commandText
+        );
+
+        try {
+
+            Command command = CommandParser.parse(commandText);
+
+            System.out.println(
+                "Transaction Type : " + command.type()
+            );
+
+            System.out.println(
+                "Account Number   : " + command.accountNumber()
+            );
+
+            System.out.println(
+                "Amount           : Rs. " + command.amount()
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                "Command Error: " + e.getMessage()
+            );
+        }
+
+        // Test an invalid command
+        System.out.println("\nInvalid Command Test:");
+
+        try {
+
+            CommandParser.parse("DEPOSIT AC0001 -500");
+
+        } catch (IllegalArgumentException e) {
+
+            System.out.println(
+                "Error: " + e.getMessage()
+            );
+        }
+
+        // ====================================
+        // PRACTICAL 4: ACCOUNT STATEMENT
+        // ====================================
+
+        System.out.println(
+            "\n=== PRACTICAL 4: ACCOUNT STATEMENT ==="
+        );
+
+        System.out.println(
+            StatementFormatter.buildStatement(accounts[0])
+        );
+
+        // ====================================
         // PRACTICAL 1: MENU SYSTEM
-        // ---------------------------------
+        // ====================================
 
         try (Scanner scanner = new Scanner(System.in)) {
 
@@ -226,9 +354,11 @@ public class MiniBank {
                 System.out.print("Enter your choice: ");
 
                 if (!scanner.hasNextInt()) {
+
                     System.out.println(
                         "Invalid input. Enter a number from 1 to 5."
                     );
+
                     scanner.next();
                     continue;
                 }
@@ -247,6 +377,7 @@ public class MiniBank {
                 };
 
                 if (option == null) {
+
                     System.out.println("Invalid choice.");
                     continue;
                 }

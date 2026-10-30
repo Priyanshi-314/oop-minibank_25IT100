@@ -4,6 +4,10 @@ import java.util.Scanner;
 
 import model.Account;
 import model.SavingsAccount;
+import model.CurrentAccount;
+
+import exception.BankException;
+import exception.InvalidAmountException;
 
 record BankInfo(String name, String branch) {}
 
@@ -30,18 +34,250 @@ public class MiniBank {
         );
 
         System.out.println(
-            "\n=== PRACTICAL 9: MULTITHREADING ==="
+            "\n=== PRACTICAL 10: CONCURRENT TRANSACTIONS ==="
         );
 
-        Account account = new SavingsAccount(
-            "Priyanshi",
-            0,
-            0
+        Account savings = new SavingsAccount(
+            "Priyanshi", 5000, 1000
         );
 
-        account.setTransactionMessagesEnabled(false);
+        Account current = new CurrentAccount(
+            "Rahul", 3000, 2000
+        );
+
+        savings.setTransactionMessagesEnabled(false);
+        current.setTransactionMessagesEnabled(false);
 
         System.out.println("\n=== ACCOUNT DETAILS ===");
+
+        printAccount(savings);
+        printAccount(current);
+
+        // 1. THREAD POOL
+
+        System.out.println(
+            "\n1. THREAD POOL TRANSACTION PROCESSING"
+        );
+
+        TransactionProcessor processor =
+                new TransactionProcessor();
+
+        // Five deposits of Rs. 100
+        for (int i = 0; i < 5; i++) {
+
+            processor.submit(() -> {
+
+                try {
+
+                    savings.deposit(100);
+
+                    System.out.println(
+                        Thread.currentThread().getName()
+                        + " deposited Rs. 100"
+                    );
+
+                } catch (InvalidAmountException e) {
+
+                    System.out.println(
+                        "Error: " + e.getMessage()
+                    );
+                }
+            });
+        }
+
+        // Three withdrawals of Rs. 50
+        for (int i = 0; i < 3; i++) {
+
+            processor.submit(() -> {
+
+                try {
+
+                    savings.withdraw(50);
+
+                    System.out.println(
+                        Thread.currentThread().getName()
+                        + " withdrew Rs. 50"
+                    );
+
+                } catch (BankException e) {
+
+                    System.out.println(
+                        "Error: " + e.getMessage()
+                    );
+                }
+            });
+        }
+
+        processor.stop();
+
+        System.out.println(
+            "Balance after thread pool: Rs. "
+            + savings.getBalance()
+        );
+
+        // 2. PRODUCER-CONSUMER
+
+        System.out.println(
+            "\n2. PRODUCER-CONSUMER DEMONSTRATION"
+        );
+
+        TransactionBuffer buffer =
+                new TransactionBuffer(3);
+
+        Thread producer = new Thread(() -> {
+
+            try {
+
+                for (int i = 0; i < 5; i++) {
+
+                    buffer.produce(() -> {
+
+                        try {
+
+                            current.deposit(200);
+
+                            System.out.println(
+                                "Consumer deposited Rs. 200"
+                            );
+
+                        } catch (InvalidAmountException e) {
+
+                            System.out.println(
+                                "Error: " + e.getMessage()
+                            );
+                        }
+                    });
+                }
+
+            } catch (InterruptedException e) {
+
+                Thread.currentThread().interrupt();
+
+            } finally {
+
+                buffer.close();
+            }
+
+        }, "Producer");
+
+        Thread consumer = new Thread(() -> {
+
+            try {
+
+                Runnable transaction;
+
+                while ((transaction = buffer.consume()) != null) {
+
+                    transaction.run();
+                }
+
+            } catch (InterruptedException e) {
+
+                Thread.currentThread().interrupt();
+            }
+
+        }, "Consumer");
+
+        producer.start();
+        consumer.start();
+
+        try {
+
+            producer.join();
+            consumer.join();
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+            return;
+        }
+
+        System.out.println(
+            "Balance after producer-consumer: Rs. "
+            + current.getBalance()
+        );
+
+        // 3. DEADLOCK DEMONSTRATION
+
+        DeadlockDemo.demonstrate();
+
+        // 4. SAFE CONCURRENT TRANSFERS
+
+        System.out.println(
+            "\n3. DEADLOCK-FREE CONCURRENT TRANSFERS"
+        );
+
+        Thread transfer1 = new Thread(() -> {
+
+            try {
+
+                savings.transfer(current, 500);
+
+                System.out.println(
+                    "Transfer A to B successful."
+                );
+
+            } catch (BankException e) {
+
+                System.out.println(
+                    "Transfer Error: " + e.getMessage()
+                );
+            }
+
+        }, "Transfer-Thread-1");
+
+        Thread transfer2 = new Thread(() -> {
+
+            try {
+
+                current.transfer(savings, 300);
+
+                System.out.println(
+                    "Transfer B to A successful."
+                );
+
+            } catch (BankException e) {
+
+                System.out.println(
+                    "Transfer Error: " + e.getMessage()
+                );
+            }
+
+        }, "Transfer-Thread-2");
+
+        transfer1.start();
+        transfer2.start();
+
+        try {
+
+            transfer1.join();
+            transfer2.join();
+
+        } catch (InterruptedException e) {
+
+            Thread.currentThread().interrupt();
+            return;
+        }
+
+        System.out.println(
+            "Both transfer threads completed."
+        );
+
+        // 5. FINAL BALANCES
+
+        System.out.println(
+            "\n=== FINAL ACCOUNT DETAILS ==="
+        );
+
+        printAccount(savings);
+        printAccount(current);
+
+        showMenu();
+    }
+
+    private static void printAccount(Account account) {
+
+        System.out.println("------------------------------");
 
         System.out.println(
             "Account Holder : " + account.getOwnerName()
@@ -52,108 +288,13 @@ public class MiniBank {
         );
 
         System.out.println(
-            "Initial Balance: Rs. " + account.getBalance()
-        );
-
-        int numberOfThreads = 10;
-        int depositsPerThread = 1000;
-        long depositAmount = 1;
-
-        long expectedBalance =
-                numberOfThreads * depositsPerThread * depositAmount;
-
-        System.out.println(
-            "\n=== THREAD CONFIGURATION ==="
+            "Account Type   : "
+            + account.getClass().getSimpleName()
         );
 
         System.out.println(
-            "Number of Threads  : " + numberOfThreads
+            "Balance        : Rs. " + account.getBalance()
         );
-
-        System.out.println(
-            "Deposits Per Thread: " + depositsPerThread
-        );
-
-        System.out.println(
-            "Amount Per Deposit : Rs. " + depositAmount
-        );
-
-        System.out.println(
-            "Expected Balance   : Rs. " + expectedBalance
-        );
-
-        Thread[] threads = new Thread[numberOfThreads];
-
-        System.out.println(
-            "\n=== STARTING THREADS ==="
-        );
-
-        for (int i = 0; i < numberOfThreads; i++) {
-
-            AccountWorker worker = new AccountWorker(
-                account,
-                depositsPerThread,
-                depositAmount
-            );
-
-            threads[i] = new Thread(
-                worker,
-                "Bank-Thread-" + (i + 1)
-            );
-
-            threads[i].start();
-        }
-
-        System.out.println(
-            "\n=== WAITING FOR THREADS ==="
-        );
-
-        for (Thread thread : threads) {
-
-            try {
-
-                thread.join();
-
-            } catch (InterruptedException e) {
-
-                Thread.currentThread().interrupt();
-
-                System.out.println(
-                    "Thread interrupted."
-                );
-
-                return;
-            }
-        }
-
-        System.out.println(
-            "\n=== FINAL TRANSACTION RESULT ==="
-        );
-
-        System.out.println(
-            "Account Holder  : " + account.getOwnerName()
-        );
-
-        System.out.println(
-            "Account Number  : " + account.getAccountNumber()
-        );
-
-        System.out.println(
-            "Expected Balance: Rs. " + expectedBalance
-        );
-
-        System.out.println(
-            "Actual Balance  : Rs. " + account.getBalance()
-        );
-
-        System.out.println(
-            "Synchronization : "
-            + (account.getBalance() == expectedBalance
-                ? "SUCCESSFUL"
-                : "FAILED")
-        );
-
-        showMenu();
     }
 
     private static void showMenu() {

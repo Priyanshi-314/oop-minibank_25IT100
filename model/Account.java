@@ -229,108 +229,124 @@ public abstract class Account
     // PRACTICAL 8: BANK TRANSFER
     // ==============================
 
-    public void transfer(Account to, long amount)
-            throws BankException {
+   public void transfer(Account to, long amount)
+        throws BankException {
 
-        System.out.println("\nStarting transfer...");
+    if (to == null) {
 
-        boolean completed = false;
+        throw new AccountNotFoundException(
+            "Destination account not found."
+        );
+    }
 
-        try {
+    if (to == this) {
 
-            if (to == null) {
+        throw new BankException(
+            "Cannot transfer to the same account."
+        );
+    }
 
-                throw new AccountNotFoundException(
-                    "Destination account not found."
-                );
-            }
+    if (amount <= 0) {
 
-            if (to == this) {
+        throw new InvalidAmountException(
+            "Transfer amount must be greater than zero."
+        );
+    }
+
+    Account first;
+    Account second;
+
+    // Always lock accounts in the same order.
+    if (this.accountNumber.compareTo(to.accountNumber) < 0) {
+
+        first = this;
+        second = to;
+
+    } else {
+
+        first = to;
+        second = this;
+    }
+
+    synchronized (first) {
+
+        synchronized (second) {
+
+            boolean completed = false;
+
+            try {
+
+                if (!this.active || !to.active) {
+
+                    throw new BankException(
+                        "Both accounts must be active."
+                    );
+                }
+
+                if (!canWithdraw(amount)) {
+
+                    long shortfall = Math.max(
+                        0,
+                        amount - getAvailableWithdrawalAmount()
+                    );
+
+                    throw new InsufficientFundsException(
+                        "Insufficient funds for transfer.",
+                        shortfall
+                    );
+                }
+
+                // Check both calculations before changing balances.
+                long newSenderBalance =
+                        Math.subtractExact(this.balance, amount);
+
+                long newReceiverBalance =
+                        Math.addExact(to.balance, amount);
+
+                this.balance = newSenderBalance;
+                to.balance = newReceiverBalance;
+
+                completed = true;
+
+                if (transactionMessagesEnabled) {
+
+                    System.out.println(
+                        "Transfer successful: Rs. " + amount
+                    );
+
+                    System.out.println(
+                        "From: " + this.accountNumber
+                    );
+
+                    System.out.println(
+                        "To  : " + to.accountNumber
+                    );
+                }
+
+            } catch (BankException e) {
+
+                throw e;
+
+            } catch (ArithmeticException e) {
 
                 throw new BankException(
-                    "Cannot transfer to the same account."
+                    "Transfer exceeds supported balance range.",
+                    e
                 );
+
+            } finally {
+
+                if (transactionMessagesEnabled) {
+
+                    System.out.println(
+                        "Transfer Status: "
+                        + (completed ? "COMPLETED" : "FAILED")
+                    );
+                }
             }
-
-            if (amount <= 0) {
-
-                throw new InvalidAmountException(
-                    "Transfer amount must be greater than zero."
-                );
-            }
-
-            if (!this.active || !to.active) {
-
-                throw new BankException(
-                    "Both accounts must be active."
-                );
-            }
-
-            // Check receiving balance before debiting
-            Math.addExact(to.balance, amount);
-
-            // Check withdrawal rule
-            if (!canWithdraw(amount)) {
-
-                long shortfall = Math.max(
-                    0,
-                    amount - getAvailableWithdrawalAmount()
-                );
-
-                throw new InsufficientFundsException(
-                    "Insufficient funds for transfer.",
-                    shortfall
-                );
-            }
-
-            // Transfer funds
-            this.balance = Math.subtractExact(
-                this.balance,
-                amount
-            );
-
-            to.balance = Math.addExact(
-                to.balance,
-                amount
-            );
-
-            completed = true;
-
-            System.out.println(
-                "Transfer successful: Rs. " + amount
-            );
-
-            System.out.println(
-                "From: " + this.accountNumber
-            );
-
-            System.out.println(
-                "To  : " + to.accountNumber
-            );
-
-        } catch (BankException e) {
-
-            System.out.println(
-                "Transfer Error: " + e.getMessage()
-            );
-
-            throw e;
-
-        } catch (ArithmeticException e) {
-
-            throw new BankException(
-                "Transfer amount exceeds supported balance range.",
-                e
-            );
-
-        } finally {
-
-            System.out.println(
-                "Transfer Status: "
-                + (completed ? "COMPLETED" : "FAILED")
-            );
         }
     }
+}
 
     // ==============================
     // DISPLAY ACCOUNT DETAILS

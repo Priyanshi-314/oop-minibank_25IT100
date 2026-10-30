@@ -14,6 +14,10 @@ import model.annotation.MaxLength;
 public abstract class Account
         implements Cloneable, Transactable, InterestBearing {
 
+    // ==============================
+    // PRACTICAL 7: ANNOTATIONS
+    // ==============================
+
     @Id
     private final String accountNumber;
 
@@ -27,16 +31,35 @@ public abstract class Account
 
     private static long accountCounter = 0;
 
-    private static String generateAccountNumber() {
+    // ==============================
+    // PRACTICAL 9: THREAD SETTINGS
+    // ==============================
+
+    private volatile boolean transactionMessagesEnabled = true;
+
+    public void setTransactionMessagesEnabled(boolean enabled) {
+        this.transactionMessagesEnabled = enabled;
+    }
+
+    // ==============================
+    // ACCOUNT NUMBER GENERATION
+    // ==============================
+
+    private static synchronized String generateAccountNumber() {
 
         accountCounter++;
 
         return String.format("AC%04d", accountCounter);
     }
 
+    // ==============================
+    // CONSTRUCTORS
+    // ==============================
+
     public Account(String ownerName, long openingBalance) {
 
         if (openingBalance < 0) {
+
             throw new IllegalArgumentException(
                 "Opening balance cannot be negative."
             );
@@ -52,6 +75,10 @@ public abstract class Account
         this(ownerName, 0);
     }
 
+    // ==============================
+    // GETTER METHODS
+    // ==============================
+
     public String getAccountNumber() {
         return accountNumber;
     }
@@ -61,7 +88,7 @@ public abstract class Account
     }
 
     @Override
-    public long getBalance() {
+    public synchronized long getBalance() {
         return balance;
     }
 
@@ -69,19 +96,30 @@ public abstract class Account
         return active;
     }
 
+    // ==============================
+    // ABSTRACT METHODS
+    // ==============================
+
     @Override
     public abstract double interestRate();
 
     public abstract boolean canWithdraw(long amount);
 
-    public double monthlyInterest() {
+    // ==============================
+    // INTEREST CALCULATION
+    // ==============================
+
+    public synchronized double monthlyInterest() {
 
         return balance * interestRate() / 1200.0;
     }
 
-    // Deposit with exception handling
+    // ==============================
+    // PRACTICAL 9: SYNCHRONIZED DEPOSIT
+    // ==============================
+
     @Override
-    public void deposit(long amount)
+    public synchronized void deposit(long amount)
             throws InvalidAmountException {
 
         if (amount <= 0) {
@@ -100,14 +138,20 @@ public abstract class Account
 
         balance = Math.addExact(balance, amount);
 
-        System.out.println(
-            "Deposit successful: Rs. " + amount
-        );
+        if (transactionMessagesEnabled) {
+
+            System.out.println(
+                "Deposit successful: Rs. " + amount
+            );
+        }
     }
 
-    // Withdrawal with exception handling
+    // ==============================
+    // PRACTICAL 9: SYNCHRONIZED WITHDRAW
+    // ==============================
+
     @Override
-    public boolean withdraw(long amount)
+    public synchronized boolean withdraw(long amount)
             throws InsufficientFundsException,
                    InvalidAmountException {
 
@@ -142,15 +186,21 @@ public abstract class Account
 
         balance = Math.subtractExact(balance, amount);
 
-        System.out.println(
-            "Withdrawal successful: Rs. " + amount
-        );
+        if (transactionMessagesEnabled) {
+
+            System.out.println(
+                "Withdrawal successful: Rs. " + amount
+            );
+        }
 
         return true;
     }
 
-    // Account-specific withdrawal availability
-    public long getAvailableWithdrawalAmount() {
+    // ==============================
+    // AVAILABLE WITHDRAWAL AMOUNT
+    // ==============================
+
+    public synchronized long getAvailableWithdrawalAmount() {
 
         if (this instanceof SavingsAccount savings) {
 
@@ -175,7 +225,10 @@ public abstract class Account
         return Math.max(0, getBalance());
     }
 
-    // Transfer between two accounts
+    // ==============================
+    // PRACTICAL 8: BANK TRANSFER
+    // ==============================
+
     public void transfer(Account to, long amount)
             throws BankException {
 
@@ -213,10 +266,10 @@ public abstract class Account
                 );
             }
 
-            // Check the receiving balance before debiting.
+            // Check receiving balance before debiting
             Math.addExact(to.balance, amount);
 
-            // Check the withdrawal rule before debiting.
+            // Check withdrawal rule
             if (!canWithdraw(amount)) {
 
                 long shortfall = Math.max(
@@ -230,7 +283,7 @@ public abstract class Account
                 );
             }
 
-            // Transfer funds only after all checks succeed.
+            // Transfer funds
             this.balance = Math.subtractExact(
                 this.balance,
                 amount
@@ -279,21 +332,29 @@ public abstract class Account
         }
     }
 
+    // ==============================
+    // DISPLAY ACCOUNT DETAILS
+    // ==============================
+
     public void displayAccount() {
 
         System.out.println("------------------------------");
         System.out.println("Account No : " + accountNumber);
         System.out.println("Owner      : " + ownerName);
-        System.out.println("Balance    : Rs. " + balance);
+        System.out.println("Balance    : Rs. " + getBalance());
         System.out.println("Active     : " + active);
     }
+
+    // ==============================
+    // PRACTICAL 3: OBJECT METHODS
+    // ==============================
 
     @Override
     public String toString() {
 
         return "Account{accountNumber='" + accountNumber
                 + "', ownerName='" + ownerName
-                + "', balance=" + balance
+                + "', balance=" + getBalance()
                 + ", active=" + active + "}";
     }
 

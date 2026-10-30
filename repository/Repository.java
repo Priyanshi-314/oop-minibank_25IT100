@@ -6,11 +6,20 @@ import java.util.HashMap;
 
 import model.annotation.Id;
 
+// ==========================================
+// PRACTICAL 13 & 14 - GENERIC REPOSITORY
+// ==========================================
+
 public class Repository<T> {
 
-    private final HashMap<String, T> storage = new HashMap<>();
+    // Store entities using their unique IDs
+    private final HashMap<String, T> storage =
+            new HashMap<>();
 
-    // SAVE ACCOUNT
+    // ==========================================
+    // SAVE ENTITY
+    // ==========================================
+
     public T save(T entity) {
 
         if (entity == null) {
@@ -26,40 +35,64 @@ public class Repository<T> {
         return entity;
     }
 
-    // SEARCH ACCOUNT
+    // ==========================================
+    // FIND ENTITY BY ID
+    // ==========================================
+
     public T findById(String id) {
 
         return storage.get(id);
     }
 
-    // DISPLAY ALL ACCOUNTS
+    // ==========================================
+    // FIND ALL ENTITIES
+    // ==========================================
+
     public ArrayList<T> findAll() {
 
         return new ArrayList<>(storage.values());
     }
 
-    // DELETE ACCOUNT
+    // ==========================================
+    // DELETE ENTITY
+    // ==========================================
+
     public boolean delete(String id) {
 
         return storage.remove(id) != null;
     }
 
-    // SAVE MULTIPLE ACCOUNTS
+    // ==========================================
+    // SAVE MULTIPLE ENTITIES
+    // ==========================================
+
     @SafeVarargs
     public final void saveAll(T... items) {
+
+        if (items == null) {
+            throw new IllegalArgumentException(
+                "Items cannot be null."
+            );
+        }
 
         for (T item : items) {
             save(item);
         }
     }
 
-    // COUNT ACCOUNTS
+    // ==========================================
+    // COUNT ENTITIES
+    // ==========================================
+
     public int count() {
 
         return storage.size();
     }
 
-    // REFLECTION USING @Id
+    // ==========================================
+    // FIND ID USING REFLECTION
+    // ==========================================
+
     private String findId(T entity) {
 
         Class<?> currentClass = entity.getClass();
@@ -67,7 +100,8 @@ public class Repository<T> {
         while (currentClass != null
                 && currentClass != Object.class) {
 
-            Field[] fields = currentClass.getDeclaredFields();
+            Field[] fields =
+                    currentClass.getDeclaredFields();
 
             for (Field field : fields) {
 
@@ -105,8 +139,12 @@ public class Repository<T> {
         );
     }
 
+    // ==========================================
     // BOUNDED GENERIC METHOD
-    public static <N extends Number> double average(N[] values) {
+    // ==========================================
+
+    public static <N extends Number> double average(
+            N[] values) {
 
         if (values == null || values.length == 0) {
 
@@ -118,6 +156,13 @@ public class Repository<T> {
         double sum = 0;
 
         for (N value : values) {
+
+            if (value == null) {
+                throw new IllegalArgumentException(
+                    "Array cannot contain null values."
+                );
+            }
+
             sum += value.doubleValue();
         }
 

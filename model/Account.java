@@ -54,7 +54,47 @@ private static final long serialVersionUID = 1L;
 
         return String.format("AC%04d", accountCounter);
     }
+// ==========================================
+// PRACTICAL 14: RESTORE ACCOUNT COUNTER
+// ==========================================
 
+public static synchronized void restoreAccountCounter(
+        Account[] accounts) {
+
+    if (accounts == null) {
+        return;
+    }
+
+    for (Account account : accounts) {
+
+        if (account == null) {
+            continue;
+        }
+
+        String number = account.getAccountNumber();
+
+        if (number == null || !number.matches("AC\\d+")) {
+            continue;
+        }
+
+        try {
+
+            long value = Long.parseLong(
+                number.substring(2)
+            );
+
+            if (value > accountCounter) {
+                accountCounter = value;
+            }
+
+        } catch (NumberFormatException e) {
+
+            System.out.println(
+                "Skipping invalid account number: " + number
+            );
+        }
+    }
+}
     // ==============================
     // CONSTRUCTORS
     // ==============================

@@ -1,295 +1,199 @@
+
 package service;
 
+import exception.BankException;
+import model.Account;
 import java.util.Scanner;
 
-import model.Account;
-import model.SavingsAccount;
-import model.CurrentAccount;
-import model.FixedDepositAccount;
-
-import repository.Repository;
-
-
-// ==========================================
-// BANK INFORMATION RECORD
-// ==========================================
-
-record BankInfo(String name, String branch) {}
-
-// ==========================================
-// MENU OPTIONS
-// ==========================================
-
-enum MenuOption {
-    OPEN_ACCOUNT,
-    DEPOSIT,
-    WITHDRAW,
-    TRANSFER,
-    EXIT
-}
-
-// ==========================================
-// MAIN MINIBANK CLASS
-// ==========================================
-
 public class MiniBank {
-
-    // ==========================================
-    // MAIN METHOD
-    // ==========================================
+    private static final Scanner INPUT = new Scanner(System.in);
+    private static final BankService BANK = new BankService();
 
     public static void main(String[] args) {
-
-        BankInfo bank = new BankInfo(
-            "MiniBank",
-            "Main Branch"
-        );
-
-        System.out.println(
-            "=== " + bank.name()
-            + " | " + bank.branch() + " ==="
-        );
-
-        // RUN PRACTICAL 13
-        practical13Demo();
-
-        // DISPLAY MINIBANK MENU
-        showMenu();
-    }
-
-    // ==========================================
-    // PRACTICAL 13: GENERICS AND REPOSITORY
-    // ==========================================
-
-    private static void practical13Demo() {
-
-        System.out.println(
-            "\n=== PRACTICAL 13: GENERICS AND REPOSITORY ==="
-        );
-
-        // STEP 1: CREATE GENERIC REPOSITORY
-
-        Repository<Account> repository = new Repository<>();
-
-        // STEP 2: CREATE THREE ACCOUNTS
-
-        Account savings = new SavingsAccount(
-            "Priyanshi",
-            5000,
-            1000
-        );
-
-        Account current = new CurrentAccount(
-            "Rahul",
-            3000,
-            2000
-        );
-
-        Account fixedDeposit = new FixedDepositAccount(
-            "Anjali",
-            10000
-        );
-
-        // STEP 3: SAVE MULTIPLE ACCOUNTS
-
-        repository.saveAll(
-            savings,
-            current,
-            fixedDeposit
-        );
-
-        System.out.println(
-            "\n=== ACCOUNTS SAVED SUCCESSFULLY ==="
-        );
-
-        System.out.println(
-            "Total Accounts: " + repository.count()
-        );
-
-        // STEP 4: SEARCH ACCOUNT BY ID
-
-        System.out.println(
-            "\n=== SEARCH ACCOUNT BY ID ==="
-        );
-
-        String searchId = current.getAccountNumber();
-
-        Account found = repository.findById(searchId);
-
-        if (found != null) {
-
-            System.out.println(
-                "Account Found Successfully!"
-            );
-
-            System.out.println(
-                "Account Number : "
-                + found.getAccountNumber()
-            );
-
-            System.out.println(
-                "Account Holder : "
-                + found.getOwnerName()
-            );
-
-            System.out.println(
-                "Balance        : Rs. "
-                + found.getBalance()
-            );
-
-        } else {
-
-            System.out.println(
-                "Account not found."
-            );
+        System.out.println("\n========== WELCOME TO MINIBANK ==========");
+        try {
+            System.out.println("Loaded " + BANK.load() + " saved account(s).");
+        } catch (Exception e) {
+            System.out.println("Could not load saved data: " + e.getMessage());
         }
 
-        // STEP 5: DISPLAY ALL ACCOUNTS
+        while (true) {
+            menu();
+            int choice = (int) number("Enter your choice: ");
 
-        System.out.println(
-            "\n=== ALL REPOSITORY ACCOUNTS ==="
-        );
+            if (choice == 0) {
+                try {
+                    BANK.save();
+                    System.out.println("Accounts saved successfully.");
+                } catch (Exception e) {
+                    System.out.println("Save failed: " + e.getMessage());
+                }
+                System.out.println("Thank you for using MiniBank!");
+                break;
+            }
 
-        for (Account account : repository.findAll()) {
-
-            System.out.println(
-                account.getAccountNumber()
-                + " | "
-                + account.getOwnerName()
-                + " | Rs. "
-                + account.getBalance()
-            );
+            try {
+                handle(choice);
+            } catch (Exception e) {
+                System.out.println("TRANSACTION FAILED: " + e.getMessage());
+            }
         }
-
-        // STEP 6: BOUNDED GENERIC METHOD
-
-        System.out.println(
-            "\n=== GENERIC AVERAGE CALCULATION ==="
-        );
-
-        Integer[] integerValues = {
-            10, 20, 30, 40, 50
-        };
-
-        Double[] doubleValues = {
-            10.5, 20.5, 30.5
-        };
-
-        System.out.println(
-            "Integer Average: "
-            + Repository.average(integerValues)
-        );
-
-        System.out.println(
-            "Double Average : "
-            + Repository.average(doubleValues)
-        );
-
-        // STEP 7: DELETE ACCOUNT
-
-        System.out.println(
-            "\n=== DELETE ACCOUNT ==="
-        );
-
-        boolean deleted = repository.delete(
-            fixedDeposit.getAccountNumber()
-        );
-
-        System.out.println(
-            "Account Deleted: " + deleted
-        );
-
-        System.out.println(
-            "Remaining Accounts: " + repository.count()
-        );
-
-        // STEP 8: COMPLETION MESSAGE
-
-        System.out.println(
-            "\n=== PRACTICAL 13 COMPLETED SUCCESSFULLY ==="
-        );
     }
 
-    // ==========================================
-    // MINIBANK MENU
-    // ==========================================
+    private static void menu() {
+        System.out.println("\n========== MINIBANK MENU ==========");
+        System.out.println(" 1. Open Account");
+        System.out.println(" 2. Deposit Money");
+        System.out.println(" 3. Withdraw Money");
+        System.out.println(" 4. Transfer Money");
+        System.out.println(" 5. Check Balance");
+        System.out.println(" 6. View Account Details");
+        System.out.println(" 7. View All Accounts");
+        System.out.println(" 8. Search Account");
+        System.out.println(" 9. Sort Accounts by Balance");
+        System.out.println("10. View Account Statement");
+        System.out.println("11. Calculate Monthly Interest");
+        System.out.println("12. Run Concurrent Transaction Demo");
+        System.out.println("13. Save Account Data");
+        System.out.println("14. Load Account Data");
+        System.out.println("15. Generate Transaction Report");
+        System.out.println("16. View Session Transaction History");
+        System.out.println("17. Project Features");
+        System.out.println(" 0. Exit");
+    }
 
-    private static void showMenu() {
+    private static String ask(String prompt) {
+        System.out.print(prompt);
+        return INPUT.nextLine().trim();
+    }
 
-        try (Scanner scanner = new Scanner(System.in)) {
+    private static long number(String prompt) {
+        while (true) {
+            try {
+                return Long.parseLong(ask(prompt));
+            } catch (NumberFormatException e) {
+                System.out.println("Please enter a valid whole number.");
+            }
+        }
+    }
 
-            boolean running = true;
+    private static void display(Account a) {
+        System.out.printf("%s | %-18s | %-19s | Rs. %d%n",
+                a.getAccountNumber(),
+                a.getOwnerName(),
+                a.getClass().getSimpleName(),
+                a.getBalance());
+    }
 
-            while (running) {
+    private static void handle(int choice) throws Exception {
+        switch (choice) {
+            case 1 -> {
+                System.out.println("1. Savings | 2. Current | 3. Fixed Deposit");
+                int type = (int) number("Type: ");
+                String name = ask("Customer name: ");
+                long opening = number("Opening balance: ");
 
-                System.out.println(
-                    "\n=== MINIBANK MENU ==="
-                );
+                long limit = type == 1
+                        ? number("Minimum balance: ")
+                        : type == 2
+                        ? number("Overdraft limit: ") : 0;
 
-                System.out.println("1. Open Account");
-                System.out.println("2. Deposit");
-                System.out.println("3. Withdraw");
-                System.out.println("4. Transfer");
-                System.out.println("5. Exit");
+                Account a = BANK.openAccount(type, name, opening, limit);
+                System.out.println("ACCOUNT CREATED SUCCESSFULLY");
+                display(a);
+            }
 
-                System.out.print("Enter your choice: ");
+            case 2 -> {
+                String id = ask("Account number: ");
+                long before = BANK.getAccount(id).getBalance();
+                long amount = number("Deposit amount: ");
+                BANK.deposit(id, amount);
 
-                if (!scanner.hasNextInt()) {
+                System.out.printf(
+                        "Previous: Rs. %d | Deposited: Rs. %d | New: Rs. %d%n",
+                        before, amount, BANK.getAccount(id).getBalance());
+            }
 
-                    System.out.println(
-                        "Invalid input. Enter a number."
-                    );
+            case 3 -> {
+                String id = ask("Account number: ");
+                long before = BANK.getAccount(id).getBalance();
+                long amount = number("Withdrawal amount: ");
+                BANK.withdraw(id, amount);
 
-                    scanner.next();
-                    continue;
-                }
+                System.out.printf(
+                        "Previous: Rs. %d | Withdrawn: Rs. %d | New: Rs. %d%n",
+                        before, amount, BANK.getAccount(id).getBalance());
+            }
 
-                int choice = scanner.nextInt();
+            case 4 -> {
+                String from = ask("Sender account: ");
+                String to = ask("Receiver account: ");
+                long amount = number("Transfer amount: ");
+                BANK.transfer(from, to, amount);
 
-                MenuOption option = switch (choice) {
+                System.out.println("Sender balance: Rs. "
+                        + BANK.getAccount(from).getBalance());
+                System.out.println("Receiver balance: Rs. "
+                        + BANK.getAccount(to).getBalance());
+            }
 
-                    case 1 -> MenuOption.OPEN_ACCOUNT;
-                    case 2 -> MenuOption.DEPOSIT;
-                    case 3 -> MenuOption.WITHDRAW;
-                    case 4 -> MenuOption.TRANSFER;
-                    case 5 -> MenuOption.EXIT;
-                    default -> null;
-                };
+            case 5 -> {
+                Account a = BANK.getAccount(ask("Account number: "));
+                System.out.println("Balance: Rs. " + a.getBalance());
+            }
 
-                if (option == null) {
+            case 6, 8 ->
+                display(BANK.getAccount(ask("Account number: ")));
 
-                    System.out.println(
-                        "Invalid choice."
-                    );
-
-                    continue;
-                }
-
-                String message = switch (option) {
-
-                    case OPEN_ACCOUNT ->
-                        "Open Account - interactive feature coming soon.";
-
-                    case DEPOSIT ->
-                        "Deposit - interactive feature coming soon.";
-
-                    case WITHDRAW ->
-                        "Withdraw - interactive feature coming soon.";
-
-                    case TRANSFER ->
-                        "Transfer - interactive feature coming soon.";
-
-                    case EXIT ->
-                        "Thank you for using MiniBank. Goodbye!";
-                };
-
-                System.out.println(message);
-
-                if (option == MenuOption.EXIT) {
-
-                    running = false;
+            case 7 -> {
+                System.out.println("ALL ACCOUNTS");
+                for (Account a : BANK.listAccounts()) {
+                    display(a);
                 }
             }
+
+            case 9 -> {
+                System.out.println("ACCOUNTS SORTED BY BALANCE (HIGH TO LOW)");
+                for (Account a : BANK.sortedByBalance()) {
+                    display(a);
+                }
+            }
+
+            case 10 ->
+                System.out.println(BANK.statement(ask("Account number: ")));
+
+            case 11 -> {
+                Account a = BANK.getAccount(ask("Account number: "));
+                System.out.printf(
+                        "Annual interest rate: %.2f%% | Monthly interest: Rs. %.2f%n",
+                        a.interestRate(), a.monthlyInterest());
+            }
+
+            case 12 -> BANK.concurrentDemo();
+
+            case 13 -> {
+                BANK.save();
+                System.out.println("Account data saved.");
+            }
+
+            case 14 ->
+                System.out.println("Loaded " + BANK.load() + " saved account(s).");
+
+            case 15 -> BANK.report();
+
+            case 16 -> {
+                System.out.println("SESSION TRANSACTION HISTORY");
+                for (String line : BANK.history()) {
+                    System.out.println(line);
+                }
+            }
+
+            case 17 ->
+                System.out.println("OOP, inheritance, interfaces, exceptions, "
+                        + "reflection, generics, collections, threads, "
+                        + "serialization, logs and reports.");
+
+            default -> System.out.println("Invalid menu choice.");
         }
     }
 }

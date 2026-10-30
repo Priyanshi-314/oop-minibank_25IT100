@@ -7,10 +7,19 @@ import model.SavingsAccount;
 import model.CurrentAccount;
 import model.FixedDepositAccount;
 
-// Bank information
+import repository.Repository;
+
+
+// ==========================================
+// BANK INFORMATION RECORD
+// ==========================================
+
 record BankInfo(String name, String branch) {}
 
-// Menu options
+// ==========================================
+// MENU OPTIONS
+// ==========================================
+
 enum MenuOption {
     OPEN_ACCOUNT,
     DEPOSIT,
@@ -18,6 +27,10 @@ enum MenuOption {
     TRANSFER,
     EXIT
 }
+
+// ==========================================
+// MAIN MINIBANK CLASS
+// ==========================================
 
 public class MiniBank {
 
@@ -37,28 +50,28 @@ public class MiniBank {
             + " | " + bank.branch() + " ==="
         );
 
-        // PRACTICAL 12 DEMONSTRATION
-        practical12Demo();
+        // RUN PRACTICAL 13
+        practical13Demo();
 
-        // EXISTING MINIBANK MENU
+        // DISPLAY MINIBANK MENU
         showMenu();
     }
 
     // ==========================================
-    // PRACTICAL 12: COLLECTIONS FRAMEWORK
+    // PRACTICAL 13: GENERICS AND REPOSITORY
     // ==========================================
 
-    private static void practical12Demo() {
+    private static void practical13Demo() {
 
         System.out.println(
-            "\n=== PRACTICAL 12: COLLECTIONS FRAMEWORK ==="
+            "\n=== PRACTICAL 13: GENERICS AND REPOSITORY ==="
         );
 
-        // STEP 1: CREATE ACCOUNT STORE
+        // STEP 1: CREATE GENERIC REPOSITORY
 
-        AccountStore store = new AccountStore();
+        Repository<Account> repository = new Repository<>();
 
-        // STEP 2: CREATE ACCOUNTS
+        // STEP 2: CREATE THREE ACCOUNTS
 
         Account savings = new SavingsAccount(
             "Priyanshi",
@@ -68,55 +81,40 @@ public class MiniBank {
 
         Account current = new CurrentAccount(
             "Rahul",
-            2000,
-            1000
+            3000,
+            2000
         );
 
         Account fixedDeposit = new FixedDepositAccount(
             "Anjali",
-            9000
+            10000
         );
 
-        // STEP 3: ADD ACCOUNTS TO HASHMAP
+        // STEP 3: SAVE MULTIPLE ACCOUNTS
 
-        store.add(savings);
-        store.add(current);
-        store.add(fixedDeposit);
-
-        System.out.println(
-            "\n=== ACCOUNTS ADDED TO HASHMAP ==="
+        repository.saveAll(
+            savings,
+            current,
+            fixedDeposit
         );
 
         System.out.println(
-            "Total Accounts: " + store.getAccountCount()
+            "\n=== ACCOUNTS SAVED SUCCESSFULLY ==="
         );
-
-        // STEP 4: DISPLAY ALL ACCOUNTS
 
         System.out.println(
-            "\n=== ALL ACCOUNTS ==="
+            "Total Accounts: " + repository.count()
         );
 
-        for (Account account : store.getAll()) {
-
-            System.out.println(
-                account.getAccountNumber()
-                + " | "
-                + account.getOwnerName()
-                + " | Rs. "
-                + account.getBalance()
-            );
-        }
-
-        // STEP 5: SEARCH ACCOUNT
+        // STEP 4: SEARCH ACCOUNT BY ID
 
         System.out.println(
-            "\n=== SEARCH ACCOUNT BY NUMBER ==="
+            "\n=== SEARCH ACCOUNT BY ID ==="
         );
 
-        String searchNumber = current.getAccountNumber();
+        String searchId = current.getAccountNumber();
 
-        Account found = store.get(searchNumber);
+        Account found = repository.findById(searchId);
 
         if (found != null) {
 
@@ -146,13 +144,13 @@ public class MiniBank {
             );
         }
 
-        // STEP 6: SORT ACCOUNTS BY BALANCE
+        // STEP 5: DISPLAY ALL ACCOUNTS
 
         System.out.println(
-            "\n=== ACCOUNTS SORTED BY BALANCE ==="
+            "\n=== ALL REPOSITORY ACCOUNTS ==="
         );
 
-        for (Account account : store.sortedByBalance()) {
+        for (Account account : repository.findAll()) {
 
             System.out.println(
                 account.getAccountNumber()
@@ -163,54 +161,52 @@ public class MiniBank {
             );
         }
 
-        // STEP 7: STORE TRANSACTION HISTORY
+        // STEP 6: BOUNDED GENERIC METHOD
 
-        store.addTransaction(
-            "DEPOSIT " + savings.getAccountNumber() + " 500"
+        System.out.println(
+            "\n=== GENERIC AVERAGE CALCULATION ==="
         );
 
-        store.addTransaction(
-            "WITHDRAW " + current.getAccountNumber() + " 200"
-        );
+        Integer[] integerValues = {
+            10, 20, 30, 40, 50
+        };
 
-        store.addTransaction(
-            "DEPOSIT " + fixedDeposit.getAccountNumber() + " 1000"
+        Double[] doubleValues = {
+            10.5, 20.5, 30.5
+        };
+
+        System.out.println(
+            "Integer Average: "
+            + Repository.average(integerValues)
         );
 
         System.out.println(
-            "\n=== TRANSACTION HISTORY ==="
+            "Double Average : "
+            + Repository.average(doubleValues)
         );
 
-        for (String transaction :
-                store.getTransactionHistory()) {
-
-            System.out.println(transaction);
-        }
-
-        // STEP 8: CONCURRENT HASHMAP
+        // STEP 7: DELETE ACCOUNT
 
         System.out.println(
-            "\n=== CONCURRENT HASHMAP TEST ==="
+            "\n=== DELETE ACCOUNT ==="
         );
 
-        TransactionProcessor processor =
-                new TransactionProcessor();
-
-        processor.addAccount(savings);
-        processor.addAccount(current);
-        processor.addAccount(fixedDeposit);
-
-        System.out.println(
-            "Thread-safe accounts stored: "
-            + processor.getAllAccounts().size()
+        boolean deleted = repository.delete(
+            fixedDeposit.getAccountNumber()
         );
 
-        processor.stop();
-
-        // STEP 9: COMPLETION MESSAGE
+        System.out.println(
+            "Account Deleted: " + deleted
+        );
 
         System.out.println(
-            "\n=== PRACTICAL 12 COMPLETED SUCCESSFULLY ==="
+            "Remaining Accounts: " + repository.count()
+        );
+
+        // STEP 8: COMPLETION MESSAGE
+
+        System.out.println(
+            "\n=== PRACTICAL 13 COMPLETED SUCCESSFULLY ==="
         );
     }
 
@@ -262,7 +258,10 @@ public class MiniBank {
 
                 if (option == null) {
 
-                    System.out.println("Invalid choice.");
+                    System.out.println(
+                        "Invalid choice."
+                    );
+
                     continue;
                 }
 

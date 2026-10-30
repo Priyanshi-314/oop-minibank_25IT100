@@ -1,6 +1,6 @@
 import java.util.Objects;
 
-public class Account implements Cloneable {
+public abstract class Account implements Cloneable {
 
     private final String accountNumber;
     private String ownerName;
@@ -14,7 +14,6 @@ public class Account implements Cloneable {
         return String.format("AC%04d", accountCounter);
     }
 
-    // Parameterized constructor
     public Account(String ownerName, long openingBalance) {
 
         if (openingBalance < 0) {
@@ -29,7 +28,6 @@ public class Account implements Cloneable {
         this.active = true;
     }
 
-    // Constructor overloading
     public Account(String ownerName) {
         this(ownerName, 0);
     }
@@ -50,6 +48,16 @@ public class Account implements Cloneable {
         return active;
     }
 
+    // Abstract methods: subclasses must implement these.
+    public abstract double interestRate();
+
+    public abstract boolean canWithdraw(long amount);
+
+    // Supplementary requirement
+    public double monthlyInterest() {
+        return balance * interestRate() / (12 * 100);
+    }
+
     public void deposit(long amount) {
 
         if (!active) {
@@ -62,11 +70,9 @@ public class Account implements Cloneable {
             return;
         }
 
-        balance += amount;
+        balance = Math.addExact(balance, amount);
 
-        System.out.println(
-            "Deposit successful: Rs. " + amount
-        );
+        System.out.println("Deposit successful: Rs. " + amount);
     }
 
     public boolean withdraw(long amount) {
@@ -77,27 +83,26 @@ public class Account implements Cloneable {
         }
 
         if (amount <= 0) {
+            System.out.println("Withdrawal amount must be positive.");
+            return false;
+        }
+
+        if (!canWithdraw(amount)) {
             System.out.println(
-                "Withdrawal amount must be positive."
+                "Withdrawal rejected: Account withdrawal rule violated."
             );
             return false;
         }
 
-        if (amount > balance) {
-            System.out.println("Insufficient balance.");
-            return false;
-        }
+        balance = Math.subtractExact(balance, amount);
 
-        balance -= amount;
-
-        System.out.println(
-            "Withdrawal successful: Rs. " + amount
-        );
+        System.out.println("Withdrawal successful: Rs. " + amount);
 
         return true;
     }
 
     public void displayAccount() {
+
         System.out.println("------------------------------");
         System.out.println("Account No : " + accountNumber);
         System.out.println("Owner      : " + ownerName);
@@ -105,18 +110,15 @@ public class Account implements Cloneable {
         System.out.println("Active     : " + active);
     }
 
-    // PRACTICAL 3: toString()
     @Override
     public String toString() {
-        return "Account{" +
-                "accountNumber='" + accountNumber + '\'' +
-                ", ownerName='" + ownerName + '\'' +
-                ", balance=" + balance +
-                ", active=" + active +
-                '}';
+
+        return "Account{accountNumber='" + accountNumber
+                + "', ownerName='" + ownerName
+                + "', balance=" + balance
+                + ", active=" + active + "}";
     }
 
-    // PRACTICAL 3: equals()
     @Override
     public boolean equals(Object obj) {
 
@@ -134,13 +136,11 @@ public class Account implements Cloneable {
         );
     }
 
-    // PRACTICAL 3: hashCode()
     @Override
     public int hashCode() {
         return Objects.hash(accountNumber);
     }
 
-    // PRACTICAL 3: clone()
     @Override
     public Account clone() {
 

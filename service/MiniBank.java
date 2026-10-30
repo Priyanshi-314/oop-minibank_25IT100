@@ -1,15 +1,12 @@
 package service;
 
+import java.lang.reflect.Field;
 import java.util.Scanner;
 
 import model.Account;
 import model.SavingsAccount;
-import model.CurrentAccount;
-import model.FixedDepositAccount;
-import model.Premium;
 
-// Static import
-import static util.Validator.isValidMobile;
+import util.AnnotationValidator;
 
 record BankInfo(String name, String branch) {}
 
@@ -36,181 +33,141 @@ public class MiniBank {
         );
 
         System.out.println(
-            "\n=== PRACTICAL 6: INTERFACES AND PACKAGES ==="
+            "\n=== PRACTICAL 7: ANNOTATIONS AND REFLECTION ==="
         );
 
-        Account savings = new SavingsAccount(
-            "Priyanshi", 5000, 1000
+        // Create a valid savings account
+        Account account = new SavingsAccount(
+            "Priyanshi",
+            5000,
+            1000
         );
 
-        Account current = new CurrentAccount(
-            "Rahul", 3000, 2000
-        );
-
-        Account fixedDeposit = new FixedDepositAccount(
-            "Anjali", 10000
-        );
-
-        Account[] accounts = {
-            savings,
-            current,
-            fixedDeposit
-        };
-
-        // 1. DEFAULT METHODS
+        System.out.println("\n=== ACCOUNT DETAILS ===");
 
         System.out.println(
-            "\n1. INTERFACE AND DEFAULT METHOD"
+            "Account Holder : " + account.getOwnerName()
         );
-
-        for (Account account : accounts) {
-
-            System.out.println("------------------------------");
-
-            System.out.println(
-                "Account Holder : " + account.getOwnerName()
-            );
-
-            System.out.println(
-                "Account Number : " + account.getAccountNumber()
-            );
-
-            System.out.println(
-                "Account Type   : "
-                + account.getClass().getSimpleName()
-            );
-
-            System.out.println(
-                "Balance        : Rs. " + account.getBalance()
-            );
-
-            System.out.println(
-                "Interest Rate  : " + account.interestRate() + "%"
-            );
-
-            System.out.printf(
-                "Yearly Interest: Rs. %.2f%n",
-                account.yearlyInterest()
-            );
-        }
-
-        // 2. ANONYMOUS CLASS
 
         System.out.println(
-            "\n2. WITHDRAW RULE USING ANONYMOUS CLASS"
+            "Account Number : " + account.getAccountNumber()
         );
 
-        WithdrawRule anonymousRule = new WithdrawRule() {
+        System.out.println(
+            "Account Balance: Rs. " + account.getBalance()
+        );
 
-            @Override
-            public boolean allow(Account account, long amount) {
+        // Test valid account
+        System.out.println("\n=== VALID ACCOUNT TEST ===");
 
-                return account.isActive()
-                        && account.canWithdraw(amount);
+        String[] validErrors =
+                AnnotationValidator.validate(account);
+
+        if (validErrors.length == 0) {
+
+            System.out.println(
+                "Validation successful: No errors found."
+            );
+
+        } else {
+
+            for (String error : validErrors) {
+                System.out.println(error);
             }
-        };
+        }
 
-        System.out.println(
-            "Account Holder : " + savings.getOwnerName()
-        );
+        // Test invalid balance using reflection
+        System.out.println("\n=== INVALID ACCOUNT TEST ===");
 
-        System.out.println(
-            "Account Number : " + savings.getAccountNumber()
-        );
+        try {
 
-        System.out.println("Requested Withdrawal: Rs. 3000");
+            Field balanceField =
+                    Account.class.getDeclaredField("balance");
 
-        System.out.println(
-            "Withdrawal Allowed: "
-            + anonymousRule.allow(savings, 3000)
-        );
+            balanceField.setAccessible(true);
 
-        // 3. LAMBDA EXPRESSION
-
-        System.out.println(
-            "\n3. WITHDRAW RULE USING LAMBDA"
-        );
-
-        WithdrawRule lambdaRule =
-                (account, amount) ->
-                        account.isActive()
-                        && account.canWithdraw(amount);
-
-        System.out.println(
-            "Account Holder : " + savings.getOwnerName()
-        );
-
-        System.out.println(
-            "Account Number : " + savings.getAccountNumber()
-        );
-
-        System.out.println("Requested Withdrawal: Rs. 4500");
-
-        System.out.println(
-            "Withdrawal Allowed: "
-            + lambdaRule.allow(savings, 4500)
-        );
-
-        // 4. MARKER INTERFACE
-
-        System.out.println(
-            "\n4. PREMIUM MARKER INTERFACE"
-        );
-
-        for (Account account : accounts) {
+            // Invalid state used only for validation testing
+            balanceField.setLong(account, -100);
 
             System.out.println(
-                account.getOwnerName()
-                + " - Premium Account: "
-                + (account instanceof Premium)
+                "Testing Balance: Rs. " + account.getBalance()
+            );
+
+            String[] errors =
+                    AnnotationValidator.validate(account);
+
+            for (String error : errors) {
+
+                System.out.println(
+                    "Validation Error: " + error
+                );
+            }
+
+            // Restore the original balance
+            balanceField.setLong(account, 5000);
+
+        } catch (ReflectiveOperationException e) {
+
+            System.out.println(
+                "Reflection Error: " + e.getMessage()
             );
         }
 
-        // 5. STATIC IMPORT
+        // Test maximum length
+        System.out.println("\n=== MAX LENGTH TEST ===");
+
+        try {
+
+            Field nameField =
+                    Account.class.getDeclaredField("ownerName");
+
+            nameField.setAccessible(true);
+
+            String originalName = account.getOwnerName();
+
+            nameField.set(
+                account,
+                "PriyanshiABCDEFGHIJKLMNOPQRSTUVWXYZ"
+            );
+
+            String[] errors =
+                    AnnotationValidator.validate(account);
+
+            for (String error : errors) {
+
+                System.out.println(
+                    "Validation Error: " + error
+                );
+            }
+
+            // Restore the original name
+            nameField.set(account, originalName);
+
+        } catch (ReflectiveOperationException e) {
+
+            System.out.println(
+                "Reflection Error: " + e.getMessage()
+            );
+        }
+
+        System.out.println("\n=== FINAL ACCOUNT STATUS ===");
 
         System.out.println(
-            "\n5. STATIC IMPORT DEMONSTRATION"
-        );
-
-        System.out.println("Mobile: 9876543210");
-
-        System.out.println(
-            "Valid Mobile: "
-            + isValidMobile("9876543210")
-        );
-
-        System.out.println("Mobile: 12345");
-
-        System.out.println(
-            "Valid Mobile: "
-            + isValidMobile("12345")
-        );
-
-        // 6. TRANSACTABLE INTERFACE
-
-        System.out.println(
-            "\n6. TRANSACTABLE INTERFACE"
+            "Account Holder : " + account.getOwnerName()
         );
 
         System.out.println(
-            "Account Holder : " + savings.getOwnerName()
+            "Account Number : " + account.getAccountNumber()
         );
 
         System.out.println(
-            "Account Number : " + savings.getAccountNumber()
+            "Account Balance: Rs. " + account.getBalance()
         );
 
-        System.out.println(
-            "Initial Balance: Rs. " + savings.getBalance()
-        );
+        showMenu();
+    }
 
-        savings.deposit(1000);
-
-        System.out.println(
-            "Final Balance: Rs. " + savings.getBalance()
-        );
-
-        // 7. MINIBANK MENU
+    private static void showMenu() {
 
         try (Scanner scanner = new Scanner(System.in)) {
 

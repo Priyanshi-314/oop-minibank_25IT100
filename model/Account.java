@@ -1,14 +1,23 @@
 package model;
 
 import java.util.Objects;
+import model.annotation.Id;
+import model.annotation.Positive;
+import model.annotation.MaxLength;
 
 public abstract class Account
         implements Cloneable, Transactable, InterestBearing {
 
-    private final String accountNumber;
-    private String ownerName;
-    private long balance;
-    private boolean active;
+ @Id
+private final String accountNumber;
+
+@MaxLength(30)
+private String ownerName;
+
+@Positive(message = "must be > 0")
+private long balance;
+
+private boolean active;
 
     private static long accountCounter = 0;
 

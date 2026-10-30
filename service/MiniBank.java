@@ -1,12 +1,15 @@
 package service;
 
-import java.lang.reflect.Field;
 import java.util.Scanner;
 
 import model.Account;
 import model.SavingsAccount;
+import model.CurrentAccount;
+import model.FixedDepositAccount;
 
-import util.AnnotationValidator;
+import exception.BankException;
+import exception.InvalidAmountException;
+import exception.InsufficientFundsException;
 
 record BankInfo(String name, String branch) {}
 
@@ -15,7 +18,7 @@ enum MenuOption {
     DEPOSIT,
     WITHDRAW,
     TRANSFER,
-    EXIT
+    EXIT    
 }
 
 public class MiniBank {
@@ -33,138 +36,215 @@ public class MiniBank {
         );
 
         System.out.println(
-            "\n=== PRACTICAL 7: ANNOTATIONS AND REFLECTION ==="
+            "\n=== PRACTICAL 8: EXCEPTION HANDLING ==="
         );
 
-        // Create a valid savings account
-        Account account = new SavingsAccount(
-            "Priyanshi",
-            5000,
-            1000
+        Account savings = new SavingsAccount(
+            "Priyanshi", 5000, 1000
         );
 
-        System.out.println("\n=== ACCOUNT DETAILS ===");
+        Account current = new CurrentAccount(
+            "Rahul", 3000, 2000
+        );
 
+        Account fixedDeposit = new FixedDepositAccount(
+            "Anjali", 10000
+        );
+
+        System.out.println("\n=== INITIAL ACCOUNT DETAILS ===");
+
+        printAccount(savings);
+        printAccount(current);
+        printAccount(fixedDeposit);
+
+        // 1. Invalid deposit
         System.out.println(
-            "Account Holder : " + account.getOwnerName()
+            "\n1. INVALID DEPOSIT TEST"
         );
-
-        System.out.println(
-            "Account Number : " + account.getAccountNumber()
-        );
-
-        System.out.println(
-            "Account Balance: Rs. " + account.getBalance()
-        );
-
-        // Test valid account
-        System.out.println("\n=== VALID ACCOUNT TEST ===");
-
-        String[] validErrors =
-                AnnotationValidator.validate(account);
-
-        if (validErrors.length == 0) {
-
-            System.out.println(
-                "Validation successful: No errors found."
-            );
-
-        } else {
-
-            for (String error : validErrors) {
-                System.out.println(error);
-            }
-        }
-
-        // Test invalid balance using reflection
-        System.out.println("\n=== INVALID ACCOUNT TEST ===");
 
         try {
 
-            Field balanceField =
-                    Account.class.getDeclaredField("balance");
+            savings.deposit(-500);
 
-            balanceField.setAccessible(true);
-
-            // Invalid state used only for validation testing
-            balanceField.setLong(account, -100);
+        } catch (InvalidAmountException e) {
 
             System.out.println(
-                "Testing Balance: Rs. " + account.getBalance()
-            );
-
-            String[] errors =
-                    AnnotationValidator.validate(account);
-
-            for (String error : errors) {
-
-                System.out.println(
-                    "Validation Error: " + error
-                );
-            }
-
-            // Restore the original balance
-            balanceField.setLong(account, 5000);
-
-        } catch (ReflectiveOperationException e) {
-
-            System.out.println(
-                "Reflection Error: " + e.getMessage()
+                "Error: " + e.getMessage()
             );
         }
 
-        // Test maximum length
-        System.out.println("\n=== MAX LENGTH TEST ===");
+        // 2. Invalid withdrawal
+        System.out.println(
+            "\n2. INVALID WITHDRAWAL TEST"
+        );
 
         try {
 
-            Field nameField =
-                    Account.class.getDeclaredField("ownerName");
+            savings.withdraw(0);
 
-            nameField.setAccessible(true);
-
-            String originalName = account.getOwnerName();
-
-            nameField.set(
-                account,
-                "PriyanshiABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            );
-
-            String[] errors =
-                    AnnotationValidator.validate(account);
-
-            for (String error : errors) {
-
-                System.out.println(
-                    "Validation Error: " + error
-                );
-            }
-
-            // Restore the original name
-            nameField.set(account, originalName);
-
-        } catch (ReflectiveOperationException e) {
+        } catch (BankException e) {
 
             System.out.println(
-                "Reflection Error: " + e.getMessage()
+                "Error: " + e.getMessage()
             );
         }
 
-        System.out.println("\n=== FINAL ACCOUNT STATUS ===");
-
+        // 3. Insufficient funds
         System.out.println(
-            "Account Holder : " + account.getOwnerName()
+            "\n3. INSUFFICIENT FUNDS TEST"
         );
 
+        try {
+
+            System.out.println(
+                "Account Holder: " + savings.getOwnerName()
+            );
+
+            System.out.println(
+                "Account Number: " + savings.getAccountNumber()
+            );
+
+            System.out.println(
+                "Attempting Withdrawal: Rs. 6000"
+            );
+
+            savings.withdraw(6000);
+
+        } catch (InsufficientFundsException e) {
+
+            System.out.println(
+                "Error: " + e.getMessage()
+            );
+
+            System.out.println(
+                "Shortfall: Rs. " + e.getShortfall()
+            );
+
+        } catch (InvalidAmountException e) {
+
+            System.out.println(
+                "Error: " + e.getMessage()
+            );
+
+        } finally {
+
+            System.out.println(
+                "Withdrawal attempt completed."
+            );
+        }
+
+        // 4. Successful deposit
         System.out.println(
-            "Account Number : " + account.getAccountNumber()
+            "\n4. SUCCESSFUL DEPOSIT TEST"
         );
 
+        try {
+
+            savings.deposit(2000);
+
+        } catch (InvalidAmountException e) {
+
+            System.out.println(
+                "Error: " + e.getMessage()
+            );
+        }
+
+        // 5. Successful transfer
         System.out.println(
-            "Account Balance: Rs. " + account.getBalance()
+            "\n5. SUCCESSFUL TRANSFER TEST"
         );
+
+        try {
+
+            savings.transfer(current, 1500);
+
+        } catch (BankException e) {
+
+            System.out.println(
+                "Error handled: " + e.getMessage()
+            );
+        }
+
+        // 6. Failed transfer
+        System.out.println(
+            "\n6. FAILED TRANSFER TEST"
+        );
+
+        try {
+
+            savings.transfer(current, 10000);
+
+        } catch (BankException e) {
+
+            System.out.println(
+                "Error handled: " + e.getMessage()
+            );
+        }
+
+        // 7. Fixed deposit withdrawal
+        System.out.println(
+            "\n7. FIXED DEPOSIT WITHDRAWAL TEST"
+        );
+
+        try {
+
+            fixedDeposit.withdraw(1000);
+
+        } catch (BankException e) {
+
+            System.out.println(
+                "Error: " + e.getMessage()
+            );
+        }
+
+        // 8. Try-with-resources
+        System.out.println(
+            "\n8. TRY-WITH-RESOURCES TEST"
+        );
+
+        try (BankResource resource = new BankResource()) {
+
+            resource.process();
+
+        } catch (Exception e) {
+
+            System.out.println(
+                "Resource Error: " + e.getMessage()
+            );
+        }
+
+        // Final account balances
+        System.out.println(
+            "\n=== FINAL ACCOUNT DETAILS ==="
+        );
+
+        printAccount(savings);
+        printAccount(current);
+        printAccount(fixedDeposit);
 
         showMenu();
+    }
+
+    private static void printAccount(Account account) {
+
+        System.out.println("------------------------------");
+
+        System.out.println(
+            "Account Holder : " + account.getOwnerName()
+        );
+
+        System.out.println(
+            "Account Number : " + account.getAccountNumber()
+        );
+
+        System.out.println(
+            "Account Type   : "
+            + account.getClass().getSimpleName()
+        );
+
+        System.out.println(
+            "Balance        : Rs. " + account.getBalance()
+        );
     }
 
     private static void showMenu() {

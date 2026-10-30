@@ -1,0 +1,29 @@
+# Ignore everything by default
+*
+
+# Allow folders and Java source files
+!*/
+!*.java
+
+# Allow README and .gitignore
+!README.md
+!.gitignore
+
+# Ignore compiled files and generated documents
+*.class
+*.jar
+*.war
+*.dat
+*.log
+*.txt
+*.docx
+*.pdf
+*.zip
+
+# Ignore build and IDE folders
+bin/
+build/
+out/
+target/
+.vscode/
+.idea/

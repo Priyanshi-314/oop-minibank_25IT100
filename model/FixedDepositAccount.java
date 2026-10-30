@@ -1,3 +1,5 @@
+package model;
+
 public class FixedDepositAccount extends Account {
 
     public FixedDepositAccount(
@@ -14,8 +16,6 @@ public class FixedDepositAccount extends Account {
 
     @Override
     public boolean canWithdraw(long amount) {
-
-        // Fixed deposits are locked in this practical.
         return false;
     }
 }

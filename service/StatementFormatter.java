@@ -1,3 +1,7 @@
+package service;
+
+import model.Account;
+
 public class StatementFormatter {
 
     public static String buildStatement(Account account) {
@@ -16,20 +20,20 @@ public class StatementFormatter {
         statement.append("====================================\n");
 
         statement.append("Account Number : ")
-                 .append(account.getAccountNumber())
-                 .append("\n");
+                .append(account.getAccountNumber())
+                .append("\n");
 
         statement.append("Account Holder : ")
-                 .append(account.getOwnerName())
-                 .append("\n");
+                .append(account.getOwnerName())
+                .append("\n");
 
         statement.append("Current Balance: Rs. ")
-                 .append(account.getBalance())
-                 .append("\n");
+                .append(account.getBalance())
+                .append("\n");
 
         statement.append("Account Status : ")
-                 .append(account.isActive() ? "ACTIVE" : "INACTIVE")
-                 .append("\n");
+                .append(account.isActive() ? "ACTIVE" : "INACTIVE")
+                .append("\n");
 
         statement.append("====================================\n");
 

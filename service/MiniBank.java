@@ -1,4 +1,15 @@
+package service;
+
 import java.util.Scanner;
+
+import model.Account;
+import model.SavingsAccount;
+import model.CurrentAccount;
+import model.FixedDepositAccount;
+import model.Premium;
+
+// Static import
+import static util.Validator.isValidMobile;
 
 record BankInfo(String name, String branch) {}
 
@@ -25,26 +36,32 @@ public class MiniBank {
         );
 
         System.out.println(
-            "\n=== PRACTICAL 5: INHERITANCE AND POLYMORPHISM ==="
+            "\n=== PRACTICAL 6: INTERFACES AND PACKAGES ==="
         );
 
-        // Create different types of accounts
-        Account[] accounts = new Account[3];
-
-        accounts[0] = new SavingsAccount(
+        Account savings = new SavingsAccount(
             "Priyanshi", 5000, 1000
         );
 
-        accounts[1] = new CurrentAccount(
+        Account current = new CurrentAccount(
             "Rahul", 3000, 2000
         );
 
-        accounts[2] = new FixedDepositAccount(
+        Account fixedDeposit = new FixedDepositAccount(
             "Anjali", 10000
         );
 
-        // Runtime polymorphism
-        System.out.println("\n=== ACCOUNT DETAILS ===");
+        Account[] accounts = {
+            savings,
+            current,
+            fixedDeposit
+        };
+
+        // 1. DEFAULT METHODS
+
+        System.out.println(
+            "\n1. INTERFACE AND DEFAULT METHOD"
+        );
 
         for (Account account : accounts) {
 
@@ -72,82 +89,129 @@ public class MiniBank {
             );
 
             System.out.printf(
-                "Monthly Interest: Rs. %.2f%n",
-                account.monthlyInterest()
+                "Yearly Interest: Rs. %.2f%n",
+                account.yearlyInterest()
             );
-
-            // Pattern matching with instanceof
-            if (account instanceof SavingsAccount savings) {
-
-                System.out.println(
-                    "Minimum Balance: Rs. "
-                    + savings.getMinBalance()
-                );
-            }
-
-            if (account instanceof CurrentAccount current) {
-
-                System.out.println(
-                    "Overdraft Limit: Rs. "
-                    + current.getOverdraftLimit()
-                );
-            }
         }
 
-        // Withdrawal demonstration
+        // 2. ANONYMOUS CLASS
+
         System.out.println(
-            "\n=== WITHDRAWAL RULE DEMONSTRATION ==="
+            "\n2. WITHDRAW RULE USING ANONYMOUS CLASS"
+        );
+
+        WithdrawRule anonymousRule = new WithdrawRule() {
+
+            @Override
+            public boolean allow(Account account, long amount) {
+
+                return account.isActive()
+                        && account.canWithdraw(amount);
+            }
+        };
+
+        System.out.println(
+            "Account Holder : " + savings.getOwnerName()
         );
 
         System.out.println(
-            "\nAccount Holder: " + accounts[0].getOwnerName()
+            "Account Number : " + savings.getAccountNumber()
+        );
+
+        System.out.println("Requested Withdrawal: Rs. 3000");
+
+        System.out.println(
+            "Withdrawal Allowed: "
+            + anonymousRule.allow(savings, 3000)
+        );
+
+        // 3. LAMBDA EXPRESSION
+
+        System.out.println(
+            "\n3. WITHDRAW RULE USING LAMBDA"
+        );
+
+        WithdrawRule lambdaRule =
+                (account, amount) ->
+                        account.isActive()
+                        && account.canWithdraw(amount);
+
+        System.out.println(
+            "Account Holder : " + savings.getOwnerName()
         );
 
         System.out.println(
-            "Account Number: " + accounts[0].getAccountNumber()
+            "Account Number : " + savings.getAccountNumber()
         );
 
-        System.out.println("Attempting to withdraw Rs. 4500");
-
-        accounts[0].withdraw(4500);
+        System.out.println("Requested Withdrawal: Rs. 4500");
 
         System.out.println(
-            "Final Balance: Rs. " + accounts[0].getBalance()
+            "Withdrawal Allowed: "
+            + lambdaRule.allow(savings, 4500)
+        );
+
+        // 4. MARKER INTERFACE
+
+        System.out.println(
+            "\n4. PREMIUM MARKER INTERFACE"
+        );
+
+        for (Account account : accounts) {
+
+            System.out.println(
+                account.getOwnerName()
+                + " - Premium Account: "
+                + (account instanceof Premium)
+            );
+        }
+
+        // 5. STATIC IMPORT
+
+        System.out.println(
+            "\n5. STATIC IMPORT DEMONSTRATION"
+        );
+
+        System.out.println("Mobile: 9876543210");
+
+        System.out.println(
+            "Valid Mobile: "
+            + isValidMobile("9876543210")
+        );
+
+        System.out.println("Mobile: 12345");
+
+        System.out.println(
+            "Valid Mobile: "
+            + isValidMobile("12345")
+        );
+
+        // 6. TRANSACTABLE INTERFACE
+
+        System.out.println(
+            "\n6. TRANSACTABLE INTERFACE"
         );
 
         System.out.println(
-            "\nAccount Holder: " + accounts[1].getOwnerName()
+            "Account Holder : " + savings.getOwnerName()
         );
 
         System.out.println(
-            "Account Number: " + accounts[1].getAccountNumber()
-        );
-
-        System.out.println("Attempting to withdraw Rs. 4000");
-
-        accounts[1].withdraw(4000);
-
-        System.out.println(
-            "Final Balance: Rs. " + accounts[1].getBalance()
+            "Account Number : " + savings.getAccountNumber()
         );
 
         System.out.println(
-            "\nAccount Holder: " + accounts[2].getOwnerName()
+            "Initial Balance: Rs. " + savings.getBalance()
         );
+
+        savings.deposit(1000);
 
         System.out.println(
-            "Account Number: " + accounts[2].getAccountNumber()
+            "Final Balance: Rs. " + savings.getBalance()
         );
 
-        System.out.println("Attempting to withdraw Rs. 1000");
+        // 7. MINIBANK MENU
 
-        accounts[2].withdraw(1000);
-
-        System.out.println(
-            "Final Balance: Rs. " + accounts[2].getBalance()
-        );
-
-        // Existing menu
         try (Scanner scanner = new Scanner(System.in)) {
 
             boolean running = true;

@@ -1,6 +1,9 @@
+package model;
+
 import java.util.Objects;
 
-public abstract class Account implements Cloneable {
+public abstract class Account
+        implements Cloneable, Transactable, InterestBearing {
 
     private final String accountNumber;
     private String ownerName;
@@ -40,6 +43,7 @@ public abstract class Account implements Cloneable {
         return ownerName;
     }
 
+    @Override
     public long getBalance() {
         return balance;
     }
@@ -48,16 +52,16 @@ public abstract class Account implements Cloneable {
         return active;
     }
 
-    // Abstract methods: subclasses must implement these.
+    @Override
     public abstract double interestRate();
 
     public abstract boolean canWithdraw(long amount);
 
-    // Supplementary requirement
     public double monthlyInterest() {
-        return balance * interestRate() / (12 * 100);
+        return balance * interestRate() / 1200.0;
     }
 
+    @Override
     public void deposit(long amount) {
 
         if (!active) {
@@ -75,6 +79,7 @@ public abstract class Account implements Cloneable {
         System.out.println("Deposit successful: Rs. " + amount);
     }
 
+    @Override
     public boolean withdraw(long amount) {
 
         if (!active) {
@@ -97,7 +102,6 @@ public abstract class Account implements Cloneable {
         balance = Math.subtractExact(balance, amount);
 
         System.out.println("Withdrawal successful: Rs. " + amount);
-
         return true;
     }
 

@@ -1,10 +1,11 @@
+package model;
+
 public class Customer {
 
     private final String customerId;
     private String name;
     private String email;
     private String mobile;
-
     private Address address;
 
     private static long customerCounter = 100;
@@ -14,25 +15,20 @@ public class Customer {
         return "CUST" + customerCounter;
     }
 
-    // Constructor from Practical 2
-    public Customer(
-        String name,
-        String email,
-        String mobile
-    ) {
+    public Customer(String name, String email, String mobile) {
+
         this.customerId = generateCustomerId();
         this.name = name;
         this.email = email;
         this.mobile = mobile;
     }
 
-    // PRACTICAL 3: Overloaded constructor
     public Customer(
-        String name,
-        String email,
-        String mobile,
-        Address address
-    ) {
+            String name,
+            String email,
+            String mobile,
+            Address address) {
+
         this(name, email, mobile);
         this.address = address;
     }
@@ -69,7 +65,6 @@ public class Customer {
         }
     }
 
-    // PRACTICAL 3: Static nested class
     public static class Address {
 
         private String city;
@@ -77,10 +72,10 @@ public class Customer {
         private String pincode;
 
         public Address(
-            String city,
-            String state,
-            String pincode
-        ) {
+                String city,
+                String state,
+                String pincode) {
+
             this.city = city;
             this.state = state;
             this.pincode = pincode;

@@ -1,3 +1,9 @@
+package service;
+
+import model.Command;
+import model.TransactionType;
+import util.Validator;
+
 public class CommandParser {
 
     public static Command parse(String line) {
@@ -8,17 +14,14 @@ public class CommandParser {
             );
         }
 
-        // Remove extra spaces and split the command
         String[] parts = line.trim().split("\\s+");
 
-        // A command must contain exactly 3 parts
         if (parts.length != 3) {
             throw new IllegalArgumentException(
                 "Invalid command. Use: TYPE ACCOUNT_NUMBER AMOUNT"
             );
         }
 
-        // Convert transaction name to enum
         TransactionType type;
 
         try {
@@ -33,14 +36,12 @@ public class CommandParser {
 
         String accountNumber = parts[1];
 
-        // Check account number format
         if (!accountNumber.matches("^AC[0-9]{4}$")) {
             throw new IllegalArgumentException(
                 "Invalid account number format."
             );
         }
 
-        // Check amount
         if (!Validator.isValidAmount(parts[2])) {
             throw new IllegalArgumentException(
                 "Amount must be a positive whole number."
@@ -49,10 +50,6 @@ public class CommandParser {
 
         long amount = Long.parseLong(parts[2]);
 
-        return new Command(
-            type,
-            accountNumber,
-            amount
-        );
+        return new Command(type, accountNumber, amount);
     }
 }

@@ -3,7 +3,7 @@ package model;
 public class SavingsAccount extends Account implements Premium {
 
     private long minBalance;
-
+private static final long serialVersionUID = 1L;
     public SavingsAccount(
             String ownerName,
             long openingBalance,

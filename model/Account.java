@@ -12,7 +12,8 @@ import model.annotation.Positive;
 import model.annotation.MaxLength;
 
 public abstract class Account
-        implements Cloneable, Transactable, InterestBearing {
+        implements Cloneable, Transactable,
+                   InterestBearing, java.io.Serializable {
 
     // ==============================
     // PRACTICAL 7: ANNOTATIONS
@@ -30,7 +31,7 @@ public abstract class Account
     private boolean active;
 
     private static long accountCounter = 0;
-
+private static final long serialVersionUID = 1L;
     // ==============================
     // PRACTICAL 9: THREAD SETTINGS
     // ==============================

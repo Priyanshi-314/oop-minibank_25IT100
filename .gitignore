@@ -27,3 +27,6 @@ out/
 target/
 .vscode/
 .idea/
+data/
+logs/
+reports/
